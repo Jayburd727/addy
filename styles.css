@@ -4,20 +4,39 @@
   margin: 0;
   display: grid;
   place-items: center;
-  background: #0b1020; /* dark, looks nice */
+  background: #0b1020;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.title{
-  margin: 0 0 18px 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: clamp(28px, 5vw, 56px);
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: white;
-  text-shadow: 0 10px 30px rgba(0,0,0,.55);
-  text-align: center;
+.hud{
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  font: 600 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.14);
+  padding: 10px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
+.reset{
+  font: inherit;
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.reset:hover{ background: rgba(255,255,255,.18); }
 
 /* The “nod” */
 .conan{
@@ -29,6 +48,7 @@
   transform-origin: 50% 60%;
   animation: nod 2.2s ease-in-out infinite;
   will-change: transform;
+  cursor: pointer;
 }
 
 @keyframes nod{
@@ -37,7 +57,23 @@
   100% { transform: rotate(-6deg) translateX(-6px); }
 }
 
-/* Respect accessibility settings */
-@media (prefers-reduced-motion: reduce){
-  .conan{ animation: none; }
+/* Little “nom” bump when fed */
+.conan.nom{
+  animation: nod 2.2s ease-in-out infinite, nom 320ms ease-out 1;
+}
+@keyframes nom{
+  0%   { filter: saturate(1); }
+  30%  { transform: scale(1.02) rotate(2deg); filter: saturate(1.15); }
+  100% { filter: saturate(1); }
+}
+
+/* Cookie projectile */
+.cookie{
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  font-size: 26px;
+  pointer-events: none;
+  will-change: transform, opacity;
 }

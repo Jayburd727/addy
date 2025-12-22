@@ -8,8 +8,20 @@
 </head>
 <body>
   <main class="stage">
-    <h1 class="title">Merry Christmas</h1>
-    <img class="conan" src="conan.jpg" alt="Deinococcus radiodurans (Conan the bacterium)" />
+    <div class="hud" aria-live="polite">
+      🍪 Cookies fed: <span id="cookieCount">0</span>
+      <button id="resetBtn" class="reset" type="button" title="Reset cookie count">Reset</button>
+    </div>
+
+    <img
+      id="conan"
+      class="conan"
+      src="conan.jpg"
+      alt="Deinococcus radiodurans (Conan the bacterium)"
+      draggable="false"
+    />
   </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
