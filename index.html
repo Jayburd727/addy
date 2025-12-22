@@ -3,25 +3,121 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Conan the Bacterium</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Conan Cookie Feed</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    .stage{
+      height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #0b1020;
+      overflow: hidden;
+      position: relative;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .conan{
+      width: min(420px, 70vw);
+      height: auto;
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      transform-origin: 50% 60%;
+      animation: nod 2.2s ease-in-out infinite;
+      cursor: pointer;
+      display: block;
+    }
+    @keyframes nod{
+      0%   { transform: rotate(-6deg) translateX(-6px); }
+      50%  { transform: rotate( 6deg) translateX( 6px); }
+      100% { transform: rotate(-6deg) translateX(-6px); }
+    }
+    .conan.nom{
+      animation: nod 2.2s ease-in-out infinite, nom 320ms ease-out 1;
+    }
+    @keyframes nom{
+      30%  { transform: scale(1.03) rotate(2deg); filter: saturate(1.15); }
+      100% { filter: saturate(1); }
+    }
+
+    /* Cookie */
+    .cookie{
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      pointer-events: none;
+      z-index: 10; /* IMPORTANT so it sits above everything */
+      will-change: transform, opacity;
+    }
+
+    /* Simple counter */
+    .hud{
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      color: rgba(255,255,255,.92);
+      font: 600 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      padding: 10px 12px;
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      z-index: 20;
+    }
+  </style>
 </head>
 <body>
-  <main class="stage">
-    <div class="hud" aria-live="polite">
-      🍪 Cookies fed: <span id="cookieCount">0</span>
-      <button id="resetBtn" class="reset" type="button" title="Reset cookie count">Reset</button>
-    </div>
-
-    <img
-      id="conan"
-      class="conan"
-      src="conan.jpg"
-      alt="Deinococcus radiodurans (Conan the bacterium)"
-      draggable="false"
-    />
+  <main class="stage" id="stage">
+    <div class="hud">🍪 Cookies fed: <span id="cookieCount">0</span></div>
+    <img id="conan" class="conan" src="conan.jpg" alt="Deinococcus radiodurans" draggable="false" />
   </main>
 
-  <script src="script.js"></script>
+  <script>
+    const stage = document.getElementById("stage");
+    const conan = document.getElementById("conan");
+    const cookieCountEl = document.getElementById("cookieCount");
+    const STORAGE_KEY = "cookies_fed_count";
+
+    function getCount(){ return Number(localStorage.getItem(STORAGE_KEY) || "0"); }
+    function setCount(n){ localStorage.setItem(STORAGE_KEY, String(n)); cookieCountEl.textContent = String(n); }
+    setCount(getCount());
+
+    function feedCookie(clientX, clientY){
+      // Spawn cookie INSIDE stage, using stage-relative coordinates
+      const stageRect = stage.getBoundingClientRect();
+      const x = clientX - stageRect.left;
+      const y = clientY - stageRect.top;
+
+      const cookie = document.createElement("div");
+      cookie.className = "cookie";
+      cookie.textContent = "🍪";
+      cookie.style.left = x + "px";
+      cookie.style.top  = y + "px";
+      stage.appendChild(cookie);
+
+      // Target = center of Conan image (also stage-relative)
+      const rect = conan.getBoundingClientRect();
+      const tx = (rect.left - stageRect.left) + rect.width * 0.52;
+      const ty = (rect.top  - stageRect.top ) + rect.height * 0.55;
+
+      cookie.animate(
+        [
+          { transform: "translate(-50%,-50%) scale(1)", opacity: 1 },
+          { transform: `translate(${tx - x}px, ${ty - y}px) scale(0.25)`, opacity: 0.1 }
+        ],
+        { duration: 520, easing: "cubic-bezier(.2,.8,.2,1)" }
+      ).onfinish = () => cookie.remove();
+
+      setCount(getCount() + 1);
+
+      conan.classList.remove("nom");
+      void conan.offsetWidth;
+      conan.classList.add("nom");
+    }
+
+    conan.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      feedCookie(e.clientX, e.clientY);
+    });
+  </script>
 </body>
 </html>
