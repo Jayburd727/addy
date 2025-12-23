@@ -18,25 +18,14 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Conan + overlay container */
+    /* Conan container that nods (hat + image together) */
     .conanWrap{
       position: relative;
       display: inline-block;
       width: min(420px, 70vw);
-    }
-
-    .conan{
-      position: relative;
-      z-index: 1; /* image below hat */
-
-      width: 100%;
-      height: auto;
-      border-radius: 18px;
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
       transform-origin: 50% 60%;
       animation: nod 2.2s ease-in-out infinite;
-      cursor: pointer;
-      display: block;
+      will-change: transform;
     }
 
     @keyframes nod{
@@ -45,7 +34,8 @@
       100% { transform: rotate(-6deg) translateX(-6px); }
     }
 
-    .conan.nom{
+    /* “nom” bump applies to the WRAP so hat follows it too */
+    .conanWrap.nom{
       animation: nod 2.2s ease-in-out infinite, nom 320ms ease-out 1;
     }
     @keyframes nom{
@@ -53,12 +43,23 @@
       100% { filter: saturate(1); }
     }
 
-    /* Hat overlay (emoji) */
+    .conan{
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: auto;
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      cursor: pointer;
+      display: block;
+    }
+
+    /* Hat overlay */
     .hat{
       position: absolute;
-      z-index: 999;  /* above image for sure */
+      z-index: 999;
       left: 50%;
-      top: 0;        /* debug-friendly placement */
+      top: 0;
       transform: translate(-50%, -60%);
       font-size: clamp(42px, 8vw, 74px);
       line-height: 1;
@@ -246,10 +247,10 @@
     const STORAGE_EQUIP   = "equipped_hat_v1";
 
     const ITEMS = [
-      { id: "top_hat",   icon: "🎩", name: "Top Hat",     desc: "Classy bacterium energy.",  cost: 100 },
-      { id: "crown",     icon: "👑", name: "Crown",       desc: "King of radiation.",       cost: 1000 },
-      { id: "party",     icon: "🥳", name: "Party Cap",   desc: "For cookie celebrations.", cost: 1200 },
-      { id: "cowboy",    icon: "🤠", name: "Cowboy Hat",  desc: "Yeehaw, microbe.",         cost: 50 },
+      { id: "top_hat", icon: "🎩", name: "Top Hat",    desc: "Classy bacterium energy.",  cost: 25 },
+      { id: "crown",   icon: "👑", name: "Crown",      desc: "King of radiation.",       cost: 60 },
+      { id: "party",   icon: "🥳", name: "Party Cap",  desc: "For cookie celebrations.", cost: 15 },
+      { id: "cowboy",  icon: "🤠", name: "Cowboy Hat", desc: "Yeehaw, microbe.",         cost: 40 },
     ];
 
     function loadJSON(key, fallback){
@@ -267,17 +268,13 @@
       renderShop();
     }
 
-    function getOwned(){
-      return new Set(loadJSON(STORAGE_OWNED, []));
-    }
+    function getOwned(){ return new Set(loadJSON(STORAGE_OWNED, [])); }
     function setOwned(set){
       saveJSON(STORAGE_OWNED, Array.from(set));
       renderShop();
     }
 
-    function getEquipped(){
-      return localStorage.getItem(STORAGE_EQUIP) || "";
-    }
+    function getEquipped(){ return localStorage.getItem(STORAGE_EQUIP) || ""; }
     function setEquipped(id){
       localStorage.setItem(STORAGE_EQUIP, id);
       renderHat();
@@ -312,7 +309,6 @@
       const cookies = getCookies();
       const owned = getOwned();
       const equipped = getEquipped();
-
       shopBody.innerHTML = "";
 
       ITEMS.forEach(item => {
@@ -394,11 +390,12 @@
 
       setCookies(getCookies() + 1);
 
-      conan.classList.remove("nom");
-      void conan.offsetWidth;
-      conan.classList.add("nom");
+      conanWrap.classList.remove("nom");
+      void conanWrap.offsetWidth;
+      conanWrap.classList.add("nom");
     }
 
+    // Click/tap the image still, but animate the WRAP
     conan.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       feedCookie(e.clientX, e.clientY);
