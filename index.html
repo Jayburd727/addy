@@ -6,6 +6,7 @@
   <title>Conan Cookie Feed</title>
   <style>
     html, body { height: 100%; margin: 0; }
+
     .stage{
       height: 100vh;
       display: grid;
@@ -17,16 +18,16 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-.conanWrap{
-  position: relative;
-  display: inline-block;
-  width: min(420px, 70vw);
-}
+    /* Conan + overlay container */
+    .conanWrap{
+      position: relative;
+      display: inline-block;
+      width: min(420px, 70vw);
+    }
 
-    /* Make the image a positioned element with a lower z-index */
     .conan{
       position: relative;
-      z-index: 1;
+      z-index: 1; /* image below hat */
 
       width: 100%;
       height: auto;
@@ -37,23 +38,6 @@
       cursor: pointer;
       display: block;
     }
-
-        /* Put the hat above it */
-    .hat{
-      position: absolute;
-      z-index: 2;
-
-      left: 50%;
-      top: -10%;
-      transform: translateX(-50%);
-      font-size: clamp(42px, 8vw, 74px);
-      line-height: 1;
-      pointer-events: none;
-      filter: drop-shadow(0 10px 10px rgba(0,0,0,.35));
-      opacity: 0;
-      transition: opacity 160ms ease;
-}
-
 
     @keyframes nod{
       0%   { transform: rotate(-6deg) translateX(-6px); }
@@ -68,6 +52,22 @@
       30%  { transform: scale(1.03) rotate(2deg); filter: saturate(1.15); }
       100% { filter: saturate(1); }
     }
+
+    /* Hat overlay (emoji) */
+    .hat{
+      position: absolute;
+      z-index: 999;  /* above image for sure */
+      left: 50%;
+      top: 0;        /* debug-friendly placement */
+      transform: translate(-50%, -60%);
+      font-size: clamp(42px, 8vw, 74px);
+      line-height: 1;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,.35));
+      opacity: 0;
+      transition: opacity 160ms ease;
+    }
+    .hat.on{ opacity: 1; }
 
     /* Cookie projectile */
     .cookie{
@@ -246,10 +246,10 @@
     const STORAGE_EQUIP   = "equipped_hat_v1";
 
     const ITEMS = [
-      { id: "top_hat",   icon: "🎩", name: "Top Hat",     desc: "Classy bacterium energy.", cost: 25 },
-      { id: "crown",     icon: "👑", name: "Crown",       desc: "King of radiation.",      cost: 60 },
-      { id: "party",     icon: "🥳", name: "Party Cap",   desc: "For cookie celebrations.",cost: 15 },
-      { id: "cowboy",    icon: "🤠", name: "Cowboy Hat",  desc: "Yeehaw, microbe.",        cost: 40 },
+      { id: "top_hat",   icon: "🎩", name: "Top Hat",     desc: "Classy bacterium energy.",  cost: 100 },
+      { id: "crown",     icon: "👑", name: "Crown",       desc: "King of radiation.",       cost: 1000 },
+      { id: "party",     icon: "🥳", name: "Party Cap",   desc: "For cookie celebrations.", cost: 1200 },
+      { id: "cowboy",    icon: "🤠", name: "Cowboy Hat",  desc: "Yeehaw, microbe.",         cost: 50 },
     ];
 
     function loadJSON(key, fallback){
