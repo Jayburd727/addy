@@ -16,8 +16,16 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    .conan{
+
+    /* Conan + overlay container */
+    .conanWrap{
+      position: relative;
+      display: inline-block;
       width: min(420px, 70vw);
+    }
+
+    .conan{
+      width: 100%;
       height: auto;
       border-radius: 18px;
       box-shadow: 0 18px 60px rgba(0,0,0,.45);
@@ -26,11 +34,13 @@
       cursor: pointer;
       display: block;
     }
+
     @keyframes nod{
       0%   { transform: rotate(-6deg) translateX(-6px); }
       50%  { transform: rotate( 6deg) translateX( 6px); }
       100% { transform: rotate(-6deg) translateX(-6px); }
     }
+
     .conan.nom{
       animation: nod 2.2s ease-in-out infinite, nom 320ms ease-out 1;
     }
@@ -39,17 +49,32 @@
       100% { filter: saturate(1); }
     }
 
-    /* Cookie */
+    /* Hat overlay (emoji) */
+    .hat{
+      position: absolute;
+      left: 50%;
+      top: -10%;
+      transform: translateX(-50%);
+      font-size: clamp(42px, 8vw, 74px);
+      line-height: 1;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,.35));
+      opacity: 0;
+      transition: opacity 160ms ease;
+    }
+    .hat.on{ opacity: 1; }
+
+    /* Cookie projectile */
     .cookie{
       position: absolute;
       transform: translate(-50%, -50%);
       font-size: 28px;
       pointer-events: none;
-      z-index: 10; /* IMPORTANT so it sits above everything */
+      z-index: 10;
       will-change: transform, opacity;
     }
 
-    /* Simple counter */
+    /* HUD */
     .hud{
       position: absolute;
       top: 16px;
@@ -62,27 +87,283 @@
       border-radius: 12px;
       backdrop-filter: blur(8px);
       z-index: 20;
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .btn{
+      font: inherit;
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 10px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .btn:hover{ background: rgba(255,255,255,.18); }
+
+    /* Shop */
+    .shop{
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: min(320px, 44vw);
+      color: rgba(255,255,255,.92);
+      font: 600 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 14px;
+      backdrop-filter: blur(8px);
+      z-index: 20;
+      overflow: hidden;
+    }
+    .shopHeader{
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .shopBody{
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+    .item{
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .icon{
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 12px;
+    }
+    .meta{ display: grid; gap: 4px; }
+    .name{ font-size: 14px; }
+    .desc{ font-size: 12px; font-weight: 500; opacity: .8; }
+    .small{
+      font-size: 12px;
+      font-weight: 600;
+      opacity: .9;
+    }
+    .btnTiny{
+      font: inherit;
+      font-size: 12px;
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 10px;
+      padding: 7px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btnTiny:hover{ background: rgba(255,255,255,.18); }
+    .btnTiny[disabled]{
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    /* toast */
+    .toast{
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,.92);
+      font: 600 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.16);
+      padding: 10px 12px;
+      border-radius: 999px;
+      z-index: 30;
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+    }
+    .toast.on{ opacity: 1; }
   </style>
 </head>
 <body>
   <main class="stage" id="stage">
-    <div class="hud">🍪 Cookies fed: <span id="cookieCount">0</span></div>
-    <img id="conan" class="conan" src="conan.jpg" alt="Deinococcus radiodurans" draggable="false" />
+    <div class="hud">
+      <span class="pill">🍪 <span id="cookieCount">0</span></span>
+      <button id="resetBtn" class="btn" type="button" title="Reset cookies + shop">Reset</button>
+    </div>
+
+    <aside class="shop" aria-label="Cookie shop">
+      <div class="shopHeader">
+        <div>Cookie Shop</div>
+        <div class="small">Click Conan to earn</div>
+      </div>
+      <div class="shopBody" id="shopBody"></div>
+    </aside>
+
+    <div class="conanWrap" id="conanWrap">
+      <div class="hat" id="hat"></div>
+      <img id="conan" class="conan" src="conan.jpg" alt="Deinococcus radiodurans" draggable="false" />
+    </div>
+
+    <div class="toast" id="toast"></div>
   </main>
 
   <script>
     const stage = document.getElementById("stage");
     const conan = document.getElementById("conan");
+    const conanWrap = document.getElementById("conanWrap");
+    const hatEl = document.getElementById("hat");
     const cookieCountEl = document.getElementById("cookieCount");
-    const STORAGE_KEY = "cookies_fed_count";
+    const resetBtn = document.getElementById("resetBtn");
+    const shopBody = document.getElementById("shopBody");
+    const toast = document.getElementById("toast");
 
-    function getCount(){ return Number(localStorage.getItem(STORAGE_KEY) || "0"); }
-    function setCount(n){ localStorage.setItem(STORAGE_KEY, String(n)); cookieCountEl.textContent = String(n); }
-    setCount(getCount());
+    const STORAGE_COOKIES = "cookies_fed_count";
+    const STORAGE_OWNED   = "owned_hats_v1";
+    const STORAGE_EQUIP   = "equipped_hat_v1";
+
+    const ITEMS = [
+      { id: "top_hat",   icon: "🎩", name: "Top Hat",     desc: "Classy bacterium energy.", cost: 25 },
+      { id: "crown",     icon: "👑", name: "Crown",       desc: "King of radiation.",      cost: 60 },
+      { id: "party",     icon: "🥳", name: "Party Cap",   desc: "For cookie celebrations.",cost: 15 },
+      { id: "cowboy",    icon: "🤠", name: "Cowboy Hat",  desc: "Yeehaw, microbe.",        cost: 40 },
+    ];
+
+    function loadJSON(key, fallback){
+      try { return JSON.parse(localStorage.getItem(key) || ""); }
+      catch { return fallback; }
+    }
+    function saveJSON(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function getCookies(){ return Number(localStorage.getItem(STORAGE_COOKIES) || "0"); }
+    function setCookies(n){
+      localStorage.setItem(STORAGE_COOKIES, String(n));
+      cookieCountEl.textContent = String(n);
+      renderShop();
+    }
+
+    function getOwned(){
+      return new Set(loadJSON(STORAGE_OWNED, []));
+    }
+    function setOwned(set){
+      saveJSON(STORAGE_OWNED, Array.from(set));
+      renderShop();
+    }
+
+    function getEquipped(){
+      return localStorage.getItem(STORAGE_EQUIP) || "";
+    }
+    function setEquipped(id){
+      localStorage.setItem(STORAGE_EQUIP, id);
+      renderHat();
+      renderShop();
+    }
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("on");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.remove("on"), 1200);
+    }
+
+    function renderHat(){
+      const equipped = getEquipped();
+      if (!equipped){
+        hatEl.textContent = "";
+        hatEl.classList.remove("on");
+        return;
+      }
+      const item = ITEMS.find(i => i.id === equipped);
+      if (!item){
+        hatEl.textContent = "";
+        hatEl.classList.remove("on");
+        return;
+      }
+      hatEl.textContent = item.icon;
+      hatEl.classList.add("on");
+    }
+
+    function renderShop(){
+      const cookies = getCookies();
+      const owned = getOwned();
+      const equipped = getEquipped();
+
+      shopBody.innerHTML = "";
+
+      ITEMS.forEach(item => {
+        const isOwned = owned.has(item.id);
+        const isEquipped = equipped === item.id;
+
+        const row = document.createElement("div");
+        row.className = "item";
+
+        const icon = document.createElement("div");
+        icon.className = "icon";
+        icon.textContent = item.icon;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML = `
+          <div class="name">${item.name} <span class="small">· ${item.cost}🍪</span></div>
+          <div class="desc">${item.desc}</div>
+        `;
+
+        const btn = document.createElement("button");
+        btn.className = "btnTiny";
+
+        if (!isOwned){
+          btn.textContent = cookies >= item.cost ? `Buy (${item.cost})` : `Need ${item.cost}`;
+          btn.disabled = cookies < item.cost;
+          btn.addEventListener("click", () => {
+            const c = getCookies();
+            if (c < item.cost) return;
+            setCookies(c - item.cost);
+            const newOwned = getOwned();
+            newOwned.add(item.id);
+            setOwned(newOwned);
+            showToast(`Bought ${item.name}!`);
+          });
+        } else {
+          btn.textContent = isEquipped ? "Unequip" : "Equip";
+          btn.addEventListener("click", () => {
+            if (isEquipped){
+              setEquipped("");
+              showToast("Hat removed.");
+            } else {
+              setEquipped(item.id);
+              showToast(`${item.name} equipped!`);
+            }
+          });
+        }
+
+        row.appendChild(icon);
+        row.appendChild(meta);
+        row.appendChild(btn);
+        shopBody.appendChild(row);
+      });
+    }
 
     function feedCookie(clientX, clientY){
-      // Spawn cookie INSIDE stage, using stage-relative coordinates
       const stageRect = stage.getBoundingClientRect();
       const x = clientX - stageRect.left;
       const y = clientY - stageRect.top;
@@ -94,8 +375,7 @@
       cookie.style.top  = y + "px";
       stage.appendChild(cookie);
 
-      // Target = center of Conan image (also stage-relative)
-      const rect = conan.getBoundingClientRect();
+      const rect = conanWrap.getBoundingClientRect();
       const tx = (rect.left - stageRect.left) + rect.width * 0.52;
       const ty = (rect.top  - stageRect.top ) + rect.height * 0.55;
 
@@ -107,7 +387,7 @@
         { duration: 520, easing: "cubic-bezier(.2,.8,.2,1)" }
       ).onfinish = () => cookie.remove();
 
-      setCount(getCount() + 1);
+      setCookies(getCookies() + 1);
 
       conan.classList.remove("nom");
       void conan.offsetWidth;
@@ -118,6 +398,20 @@
       e.preventDefault();
       feedCookie(e.clientX, e.clientY);
     });
+
+    resetBtn.addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_COOKIES);
+      localStorage.removeItem(STORAGE_OWNED);
+      localStorage.removeItem(STORAGE_EQUIP);
+      setCookies(0);
+      renderHat();
+      showToast("Reset.");
+    });
+
+    // init
+    setCookies(getCookies());
+    renderHat();
+    renderShop();
   </script>
 </body>
 </html>
