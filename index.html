@@ -214,6 +214,8 @@
     <div class="hud">
       <span class="pill">🍪 <span id="cookieCount">0</span></span>
       <button id="resetBtn" class="btn" type="button" title="Reset cookies + shop">Reset</button>
+      <button id="musicBtn" class="btn" type="button">Music: Off</button>
+      <audio id="bgm" src="playful_music.mp3" loop preload="auto"></audio>
     </div>
 
     <aside class="shop" aria-label="Cookie shop">
@@ -232,7 +234,52 @@
     <div class="toast" id="toast"></div>
   </main>
 
+  
   <script>
+
+    const bgm = document.getElementById("bgm");
+    const musicBtn = document.getElementById("musicBtn");
+    const MUSIC_KEY = "music_on_v1";
+
+    function setMusicUI(on){
+      musicBtn.textContent = on ? "Music: On" : "Music: Off";
+    }
+
+    function isMusicOn(){
+      return localStorage.getItem(MUSIC_KEY) === "1";
+    }
+
+    async function startMusic(){
+      try{
+        bgm.volume = 0.25;     // nice background level
+        await bgm.play();      // will only work after a user gesture
+      } catch {
+        showToast("Tap again to enable sound.");
+      }
+    }
+
+    function stopMusic(){
+      bgm.pause();
+      bgm.currentTime = 0;
+    }
+
+    function setMusic(on){
+      localStorage.setItem(MUSIC_KEY, on ? "1" : "0");
+      setMusicUI(on);
+      if (on) startMusic();
+      else stopMusic();
+    }
+
+    // init music state
+    setMusicUI(isMusicOn());
+    if (isMusicOn()){
+      // don't try autoplay immediately; wait for a user gesture
+    }
+    musicBtn.addEventListener("click", () => {
+      const on = !isMusicOn();
+      setMusic(on);
+    });
+
     const stage = document.getElementById("stage");
     const conan = document.getElementById("conan");
     const conanWrap = document.getElementById("conanWrap");
@@ -247,10 +294,10 @@
     const STORAGE_EQUIP   = "equipped_hat_v1";
 
     const ITEMS = [
-      { id: "top_hat", icon: "🎩", name: "Top Hat",    desc: "Classy bacterium energy.",  cost: 25 },
-      { id: "crown",   icon: "👑", name: "Crown",      desc: "King of radiation.",       cost: 60 },
-      { id: "party",   icon: "🥳", name: "Party Cap",  desc: "For cookie celebrations.", cost: 15 },
-      { id: "cowboy",  icon: "🤠", name: "Cowboy Hat", desc: "Yeehaw, microbe.",         cost: 40 },
+      { id: "top_hat", icon: "🎩", name: "Top Hat",    desc: "Classy bacterium energy.",  cost: 100 },
+      { id: "crown",   icon: "👑", name: "Crown",      desc: "King of radiation.",       cost: 1000 },
+      { id: "party",   icon: "🥳", name: "Party Cap",  desc: "For cookie celebrations.", cost: 250 },
+      { id: "cowboy",  icon: "🤠", name: "Cowboy Hat", desc: "Yeehaw, microbe.",         cost: 500 },
     ];
 
     function loadJSON(key, fallback){
