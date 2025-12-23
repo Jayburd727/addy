@@ -17,14 +17,17 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Conan + overlay container */
-    .conanWrap{
-      position: relative;
-      display: inline-block;
-      width: min(420px, 70vw);
-    }
+.conanWrap{
+  position: relative;
+  display: inline-block;
+  width: min(420px, 70vw);
+}
 
+    /* Make the image a positioned element with a lower z-index */
     .conan{
+      position: relative;
+      z-index: 1;
+
       width: 100%;
       height: auto;
       border-radius: 18px;
@@ -34,6 +37,23 @@
       cursor: pointer;
       display: block;
     }
+
+        /* Put the hat above it */
+    .hat{
+      position: absolute;
+      z-index: 2;
+
+      left: 50%;
+      top: -10%;
+      transform: translateX(-50%);
+      font-size: clamp(42px, 8vw, 74px);
+      line-height: 1;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,.35));
+      opacity: 0;
+      transition: opacity 160ms ease;
+}
+
 
     @keyframes nod{
       0%   { transform: rotate(-6deg) translateX(-6px); }
@@ -48,21 +68,6 @@
       30%  { transform: scale(1.03) rotate(2deg); filter: saturate(1.15); }
       100% { filter: saturate(1); }
     }
-
-    /* Hat overlay (emoji) */
-    .hat{
-      position: absolute;
-      left: 50%;
-      top: -10%;
-      transform: translateX(-50%);
-      font-size: clamp(42px, 8vw, 74px);
-      line-height: 1;
-      pointer-events: none;
-      filter: drop-shadow(0 10px 10px rgba(0,0,0,.35));
-      opacity: 0;
-      transition: opacity 160ms ease;
-    }
-    .hat.on{ opacity: 1; }
 
     /* Cookie projectile */
     .cookie{
